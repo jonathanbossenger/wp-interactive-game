@@ -21,9 +21,15 @@ $plugin_url = WP_PLUGIN_URL . '/wp-interactive-game/';
 ?>
 <div>
     <p>Instructions: click on the WordPress logo, then use the arrow keys to move it.</p>
+    <ol>
+        <li>Click on the WordPress logo.</li>
+        <li>Use the arrow keys to move the logo.</li>
+        <li>Click the "Stop Game" button to end the game loop.</li>
+    </ol>
 </div>
 <div <?php echo get_block_wrapper_attributes(); ?> data-wp-interactive='{ "namespace": "wp-interactive-game" }'>
-    <div tabindex="0" class="game-container" data-wp-on--keydown="actions.moveIcon" id="<?php echo esc_attr( $unique_id ); ?>">
-        <img class="game-icon" style="left: 0px; top: 0px;" src="<?php echo $plugin_url ?>wordpress.svg" alt="Game Icon"/>
+    <div tabindex="0" class="game-container" data-wp-on--keydown="actions.moveIcon" data-wp-on--keyup="actions.stopIcon" id="<?php echo esc_attr( $unique_id ); ?>">
+        <img data-wp-on--click="actions.startGame" class="game-icon" style="left: 0px; top: 0px;" src="<?php echo $plugin_url ?>wordpress.svg" alt="Game Icon"/>
     </div>
+    <button data-wp-on--click="actions.stopGame" class="game-button">Stop Game</button>
 </div>

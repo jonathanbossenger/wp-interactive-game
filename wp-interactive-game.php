@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       WP Interactive Game
  * Description:       An interactive game block built with the Interactivity API
- * Version:           0.0.1
+ * Version:           0.0.2
  * Requires at least: 6.1
  * Requires PHP:      7.0
  * Author:            Jonathan Bossenger
