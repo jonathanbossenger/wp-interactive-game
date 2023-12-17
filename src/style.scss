@@ -1,0 +1,19 @@
+.wp-block-wp-interactive-game-game-block {
+	background: #ffff001a;
+	height: 600px;
+	font-size: 1em;
+	padding: 1em;
+	width: 600px;
+}
+
+.wp-block-wp-interactive-game-game-block .game-container {
+	height: 100%;
+	width: 100%;
+}
+
+.wp-block-wp-interactive-game-game-block .game-container .game-icon {
+	transition: all 0.2s linear;
+	height: 50px;
+	position: relative;
+	width: 50px;
+}

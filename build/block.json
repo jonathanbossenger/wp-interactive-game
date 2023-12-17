@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wp-interactive-game/game-block",
+  "version": "0.0.1",
+  "title": "WP Interactive Game",
+  "category": "widgets",
+  "icon": "media-interactive",
+  "description": "An interactive game block built with the Interactivity API",
+  "example": {},
+  "supports": {
+    "interactivity": true
+  },
+  "textdomain": "wp-interactive-game",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}
