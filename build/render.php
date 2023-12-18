@@ -17,7 +17,7 @@ $unique_id = wp_unique_id( 'p-' );
 if (function_exists('gutenberg_enqueue_module')) {
 	gutenberg_enqueue_module( 'wp-interactive-game-view' );
 }
-$plugin_url = WP_PLUGIN_URL . '/wp-interactive-game/';
+$icon_url = WP_PLUGIN_URL . '/wp-interactive-game/icons/';
 ?>
 <div>
     <p>Instructions: click on the WordPress logo, then use the arrow keys to move it.</p>
@@ -29,7 +29,14 @@ $plugin_url = WP_PLUGIN_URL . '/wp-interactive-game/';
 </div>
 <div <?php echo get_block_wrapper_attributes(); ?> data-wp-interactive='{ "namespace": "wp-interactive-game" }'>
     <div tabindex="0" class="game-container" data-wp-on--keydown="actions.moveIcon" data-wp-on--keyup="actions.stopIcon" id="<?php echo esc_attr( $unique_id ); ?>">
-        <img data-wp-on--click="actions.startGame" class="game-icon" style="left: 0px; top: 0px;" src="<?php echo $plugin_url ?>wordpress.svg" alt="Game Icon"/>
+        <img data-wp-on--click="actions.startGame" class="game-icon" style="left: 0px; top: 0px;" src="<?php echo $icon_url ?>wordpress.svg" alt="Game Icon"/>
+        <img id="wix" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>wix.svg" alt="Wix: Icon"/>
+        <img id="squarespace" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>squarespace.svg" alt="Squarespace: Icon"/>
+        <img id="weebly" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>weebly.svg" alt="Weebly: Icon"/>
+        <img id="shopify" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>shopify.svg" alt="Shopify: Icon"/>
     </div>
-    <button data-wp-on--click="actions.stopGame" class="game-button">Stop Game</button>
 </div>
+<div data-wp-interactive='{ "namespace": "wp-interactive-game-controls" }' >
+    <button data-wp-on--click="actions.stopGame">Stop Game</button>
+</div>
+

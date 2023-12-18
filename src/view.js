@@ -7,8 +7,25 @@ const icon = document.querySelector('.game-icon');
 const speed = 20;
 
 let arrowLeft, arrowRight, arrowUp, arrowDown = false;
+let direction = 'right';
 let lastRender = 0
 let animationFrameId;
+
+function spawnEnemies(){
+    const enemies = ['wix', 'squarespace', 'weebly', 'shopify'];
+    // loop through enemies
+    enemies.forEach(enemy => {
+        // get enemy element
+        const enemyElement = document.querySelector(`#${enemy}`);
+        // randomly select start top position
+        const top = Math.floor(Math.random() * 500);
+        // set top position
+        enemyElement.style.top = `${top}px`;
+        // display enemy
+        enemyElement.style.display = 'block';
+    });
+
+}
 
 // Move the icon
 function moveIcon(delta) {
@@ -39,18 +56,42 @@ function moveIcon(delta) {
     }
 }
 
+// Move the enemies
+function moveEnemies(delta) {
+    const enemyWix = document.querySelector('#wix');
+    const movement = 10 * delta;
+
+    if (enemyWix.style.display === 'block') {
+        if (parseInt(enemyWix.style.left) >= 550) {
+            direction = 'left';
+        }
+        if (parseInt(enemyWix.style.left) <= 0) {
+            direction = 'right';
+        }
+        console.log("Wix Direction: " + direction);
+        if (direction === 'right') {
+            enemyWix.style.left = `${parseInt(enemyWix.style.left) + movement}px`;
+            enemyWix.style.top = `${parseInt(enemyWix.style.top) + movement}px`;
+        } else {
+            enemyWix.style.left = `${parseInt(enemyWix.style.left) - movement}px`;
+            enemyWix.style.top = `${parseInt(enemyWix.style.top) - movement}px`;
+        }
+    }
+}
+
 // Update game state
 function update(progress) {
     let delta = progress / 60;
     moveIcon(delta);
+    moveEnemies(delta);
 }
 
 // The main game loop, keeps running until the game ends.
-// //https://gamedev.stackexchange.com/a/130617
+// https://gamedev.stackexchange.com/a/130617
 function loop(timestamp) {
 	console.log('Game Running');
     let progress = timestamp - lastRender
-    update(progress)
+    update(progress);
     lastRender = timestamp
     // don't call this loop again to stop the game
     animationFrameId = window.requestAnimationFrame(loop)
@@ -60,11 +101,9 @@ store('wp-interactive-game', {
     actions: {
         startGame: () => {
             console.log('Start Game');
+            icon.focus();
+            spawnEnemies();
             animationFrameId = window.requestAnimationFrame(loop)
-        },
-        stopGame: () => {
-            console.log('Stop Game');
-            window.cancelAnimationFrame(animationFrameId);
         },
         moveIcon: (event) => {
             event.preventDefault();
@@ -95,6 +134,15 @@ store('wp-interactive-game', {
             if (event.key === 'ArrowRight') {
                 arrowRight = false;
             }
+        },
+    },
+});
+
+store('wp-interactive-game-controls', {
+    actions: {
+        stopGame: () => {
+            console.log('Stop Game');
+            window.cancelAnimationFrame(animationFrameId);
         },
     },
 });
