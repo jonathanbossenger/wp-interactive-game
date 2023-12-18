@@ -7,24 +7,72 @@ const icon = document.querySelector('.game-icon');
 const speed = 20;
 
 let arrowLeft, arrowRight, arrowUp, arrowDown = false;
-let direction = 'right';
+
+const startPositions = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550];
+const horizontalDirections = ['left', 'right'];
+const verticalDirections = ['up', 'down'];
+
+let enemies = [
+    {
+        id: 'wix',
+        top: startPositions[Math.floor(Math.random() * startPositions.length)],
+        left: startPositions[Math.floor(Math.random() * startPositions.length)],
+        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        downLimit: 745,
+        upLimit: -305,
+        leftLimit: -245,
+        rightLimit: 790,
+    },{
+        id: 'squarespace',
+        top: startPositions[Math.floor(Math.random() * startPositions.length)],
+        left: startPositions[Math.floor(Math.random() * startPositions.length)],
+        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        downLimit: 695,
+        upLimit: -355,
+        leftLimit: -245,
+        rightLimit: 790,
+    },
+    {
+        id: 'weebly',
+        top: startPositions[Math.floor(Math.random() * startPositions.length)],
+        left: startPositions[Math.floor(Math.random() * startPositions.length)],
+        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        downLimit: 645,
+        upLimit: -405,
+        leftLimit: -245,
+        rightLimit: 790,
+    },
+    {
+        id: 'shopify',
+        top: startPositions[Math.floor(Math.random() * startPositions.length)],
+        left: startPositions[Math.floor(Math.random() * startPositions.length)],
+        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        downLimit: 595,
+        upLimit: -455,
+        leftLimit: -245,
+        rightLimit: 790,
+    }
+];
+
 let lastRender = 0
 let animationFrameId;
 
+function positionIcon(){
+    icon.style.top = `${startPositions[Math.floor(Math.random() * startPositions.length)]}px`;
+    icon.style.left = `${startPositions[Math.floor(Math.random() * startPositions.length)]}px`;
+}
+
 function spawnEnemies(){
-    const enemies = ['wix', 'squarespace', 'weebly', 'shopify'];
-    // loop through enemies
     enemies.forEach(enemy => {
-        // get enemy element
-        const enemyElement = document.querySelector(`#${enemy}`);
-        // randomly select start top position
-        const top = Math.floor(Math.random() * 500);
-        // set top position
-        enemyElement.style.top = `${top}px`;
-        // display enemy
+        const enemyElement = document.querySelector(`#${enemy.id}`);
+        enemyElement.style.top = `${enemy.top}px`;
+        enemyElement.style.left = `${enemy.left}px`;
         enemyElement.style.display = 'block';
     });
-
 }
 
 // Move the icon
@@ -58,25 +106,47 @@ function moveIcon(delta) {
 
 // Move the enemies
 function moveEnemies(delta) {
-    const enemyWix = document.querySelector('#wix');
-    const movement = 10 * delta;
 
-    if (enemyWix.style.display === 'block') {
-        if (parseInt(enemyWix.style.left) >= 550) {
-            direction = 'left';
+    const movement = 5;
+
+    for (let i = 0; i < enemies.length; i++) {
+
+        const enemyElement = document.querySelector(`#${enemies[i].id}`);
+
+        if (enemyElement.style.display === 'block') {
+
+            if (enemies[i].verticalDirection === 'down') {
+                if (parseInt(enemyElement.style.top) >= enemies[i].downLimit) {
+                    //verticalDirection = 'up';
+                    enemies[i].verticalDirection = 'up';
+                }
+                enemyElement.style.top = `${parseInt(enemyElement.style.top) + movement}px`;
+            }
+
+            if (enemies[i].verticalDirection === 'up') {
+                if (parseInt(enemyElement.style.top) <= enemies[i].upLimit) {
+                    enemies[i].verticalDirection = 'down';
+                }
+                enemyElement.style.top = `${parseInt(enemyElement.style.top) - movement}px`;
+            }
+
+            if (enemies[i].horizontalDirection === 'right') {
+                if (parseInt(enemyElement.style.left) >= enemies[i].rightLimit) {
+                    enemies[i].horizontalDirection = 'left';
+                }
+                enemyElement.style.left = `${parseInt(enemyElement.style.left) + movement}px`;
+            }
+
+            if (enemies[i].horizontalDirection === 'left') {
+                if (parseInt(enemyElement.style.left) <= enemies[i].leftLimit) {
+                    enemies[i].horizontalDirection = 'right';
+                }
+                enemyElement.style.left = `${parseInt(enemyElement.style.left) - movement}px`;
+            }
         }
-        if (parseInt(enemyWix.style.left) <= 0) {
-            direction = 'right';
-        }
-        console.log("Wix Direction: " + direction);
-        if (direction === 'right') {
-            enemyWix.style.left = `${parseInt(enemyWix.style.left) + movement}px`;
-            enemyWix.style.top = `${parseInt(enemyWix.style.top) + movement}px`;
-        } else {
-            enemyWix.style.left = `${parseInt(enemyWix.style.left) - movement}px`;
-            enemyWix.style.top = `${parseInt(enemyWix.style.top) - movement}px`;
-        }
+
     }
+
 }
 
 // Update game state
@@ -91,7 +161,9 @@ function update(progress) {
 function loop(timestamp) {
 	console.log('Game Running');
     let progress = timestamp - lastRender
-    update(progress);
+    if (lastRender !== timestamp) {
+        update(progress);
+    }
     lastRender = timestamp
     // don't call this loop again to stop the game
     animationFrameId = window.requestAnimationFrame(loop)
@@ -101,7 +173,7 @@ store('wp-interactive-game', {
     actions: {
         startGame: () => {
             console.log('Start Game');
-            icon.focus();
+            positionIcon();
             spawnEnemies();
             animationFrameId = window.requestAnimationFrame(loop)
         },
