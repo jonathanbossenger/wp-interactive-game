@@ -55,6 +55,17 @@ let enemies = [
         upLimit: -455,
         leftLimit: -245,
         rightLimit: 790,
+    },
+    {
+        id: 'webflow',
+        top: startPositions[Math.floor(Math.random() * startPositions.length)],
+        left: startPositions[Math.floor(Math.random() * startPositions.length)],
+        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        downLimit: 545,
+        upLimit: -505,
+        leftLimit: -245,
+        rightLimit: 790,
     }
 ];
 

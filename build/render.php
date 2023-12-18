@@ -34,6 +34,7 @@ $icon_url = WP_PLUGIN_URL . '/wp-interactive-game/icons/';
         <img id="squarespace" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>squarespace.svg" alt="Squarespace: Icon"/>
         <img id="weebly" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>weebly.svg" alt="Weebly: Icon"/>
         <img id="shopify" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>shopify.svg" alt="Shopify: Icon"/>
+        <img id="webflow" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>webflow.svg" alt="Webflow: Icon"/>
     </div>
 </div>
 <div data-wp-interactive='{ "namespace": "wp-interactive-game-controls" }' >
