@@ -161,12 +161,13 @@ function updateTime(progress) {
     timeElement.setAttribute('data-milliseconds', newTime);
     let elapsedSeconds = Math.round(newTime/1000);
 
-    // every 15 seconds increase enemy speed
-    if (elapsedSeconds > 0 && elapsedSeconds % 15 === 0) {
+    // every 10 seconds increase enemy speed
+    if (elapsedSeconds > 0 && elapsedSeconds % 10 === 0) {
         // divide elapsed seconds by 15 to get the number of times the enemy speed has been increased
-        let enemySpeedIncrease = elapsedSeconds / 15;
+        let enemySpeedIncrease = elapsedSeconds / 10;
         // increase enemy speed by 0.25 for every enemy speed increase
         enemySpeed = baseEnemySpeed + ( 0.25 * enemySpeedIncrease );
+        console.log(`Enemy speed increased to ${ enemySpeed }`);
         // update level
         if (enemySpeedIncrease > 0) {
             level = enemySpeedIncrease + 1;
