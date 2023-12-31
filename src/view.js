@@ -83,46 +83,44 @@ function moveIcon(delta) {
 function moveEnemies(delta) {
     const gameContainerOffset = getGameContainerOffset();
 
-    const movement = 2;
-
     for (let i = 0; i < enemies.length; i++) {
         let enemyElement = document.querySelector(`#${enemies[i].id}`);
 
         /**
          * Calculating left and right directions
          */
-        let updatedLeftPosition = parseInt(enemyElement.style.left) + movement;
+        let updatedLeftPosition = parseInt(enemyElement.style.left) + enemySpeed;
 
-        if (updatedLeftPosition >= ( gameContainerOffset.left + 550 ) ) {
+        if (updatedLeftPosition >= ( gameContainerOffset.left + 575 ) ) {
             enemies[i].horizontalDirection = 'left';
         }
 
-        if (updatedLeftPosition <= gameContainerOffset.left )  {
+        if (updatedLeftPosition <= gameContainerOffset.left - 25 )  {
             enemies[i].horizontalDirection = 'right';
         }
 
         /**
          * Calculating up and down directions
          */
-        let updatedTopPosition = parseInt(enemyElement.style.top) + movement;
-        if (updatedTopPosition >= gameContainerOffset.top + 550 ) {
+        let updatedTopPosition = parseInt(enemyElement.style.top) + enemySpeed;
+        if (updatedTopPosition >= gameContainerOffset.top + 575 ) {
             enemies[i].verticalDirection = 'up';
         }
-        if(updatedTopPosition <= gameContainerOffset.top) {
+        if(updatedTopPosition <= gameContainerOffset.top - 25) {
             enemies[i].verticalDirection = 'down';
         }
 
 
         if (enemies[i].horizontalDirection === 'right') {
-            enemyElement.style.left = `${parseInt(enemyElement.style.left) + movement}px`;
+            enemyElement.style.left = `${parseInt(enemyElement.style.left) + enemySpeed}px`;
         }   else {
-            enemyElement.style.left = `${parseInt(enemyElement.style.left) - movement}px`;
+            enemyElement.style.left = `${parseInt(enemyElement.style.left) - enemySpeed}px`;
         }
 
         if(enemies[i].verticalDirection === 'down') {
-            enemyElement.style.top = `${parseInt(enemyElement.style.top) + movement}px`;
+            enemyElement.style.top = `${parseInt(enemyElement.style.top) + enemySpeed}px`;
         }   else {
-            enemyElement.style.top = `${parseInt(enemyElement.style.top) - movement}px`;
+            enemyElement.style.top = `${parseInt(enemyElement.style.top) - enemySpeed}px`;
         }
     }
 }
@@ -158,20 +156,32 @@ function renderExplosion() {
 
 function updateTime(progress) {
     const timeElement = document.querySelector('#time');
-    // get data-miliseconds attribute from time element
-    const time = parseInt(timeElement.getAttribute('data-miliseconds'));
+    const time = parseInt(timeElement.getAttribute('data-milliseconds'));
     const newTime = time + progress;
-    // update data-miliseconds attribute
-    timeElement.setAttribute('data-miliseconds', newTime);
-    // update time element
-    timeElement.innerHTML = `${ Math.round(newTime/1000) }`;
+    timeElement.setAttribute('data-milliseconds', newTime);
+    let elapsedSeconds = Math.round(newTime/1000);
+
+    // every 15 seconds increase enemy speed
+    if (elapsedSeconds > 0 && elapsedSeconds % 15 === 0) {
+        // divide elapsed seconds by 15 to get the number of times the enemy speed has been increased
+        let enemySpeedIncrease = elapsedSeconds / 15;
+        // increase enemy speed by 0.25 for every enemy speed increase
+        enemySpeed = baseEnemySpeed + ( 0.25 * enemySpeedIncrease );
+        // update level
+        if (enemySpeedIncrease > 0) {
+            level = enemySpeedIncrease + 1;
+            const levelElement = document.querySelector('#level');
+            levelElement.innerHTML = `${ level }`;
+        }
+    }
+
+    timeElement.innerHTML = `${ elapsedSeconds }`;
 }
 
 // Update game state
 function update(progress) {
     updateTime(progress);
     let delta = progress / 60;
-    updateTime(progress);
     moveIcon(delta);
     moveEnemies(delta);
     detectCollision();
@@ -182,11 +192,9 @@ function update(progress) {
 function loop(timestamp) {
     let progress = timestamp - lastRender
     if (lastRender !== timestamp) {
-        //console.log('Game Running: ' + progress + 'ms');
         update(progress);
     }
     lastRender = timestamp
-    // don't call this loop again to stop the game
     if (gameState === 'running') {
         animationFrameId = window.requestAnimationFrame(loop)
     } else {
@@ -198,6 +206,9 @@ let lastRender = 0
 let animationFrameId;
 let gameState = 'running';
 let killer;
+let baseEnemySpeed = 1.5;
+let enemySpeed = baseEnemySpeed;
+let level = 1;
 
 const icon = document.querySelector('.game-icon');
 const speed = 20;
@@ -237,6 +248,17 @@ let enemies = [
         horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
         verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
     }];
+
+window.addEventListener("keydown", (event) => {
+    if (event.key === 's') {
+        let startButton = document.querySelector('#start-game');
+        startButton.click();
+    }
+    if (event.key === 'r') {
+        let resetButton = document.querySelector('#reset-game');
+        resetButton.click();
+    }
+});
 
 store('wp-interactive-game', {
     actions: {
@@ -289,16 +311,22 @@ store('wp-interactive-game-controls', {
             gameIcon.click();
         },
         resetGame: () => {
+            console.clear();
             console.log('Reset Game');
             const timeElement = document.querySelector('#time');
             timeElement.innerHTML = '0';
-            timeElement.setAttribute('data-miliseconds', '0');
+            timeElement.setAttribute('data-milliseconds', 0);
             gameState = 'running';
             icon.src = icon.src.replace('bomb-explosion.svg', 'wordpress.svg');
             icon.style.width = '50px';
             icon.style.height = '50px';
             icon.style.top = '275px';
             icon.style.left = '275px';
+            baseEnemySpeed = 1.5;
+            enemySpeed = baseEnemySpeed;
+            level = 1;
+            const levelElement = document.querySelector('#level');
+            levelElement.innerHTML = `${ level }`;
             for (let i = 0; i < enemies.length; i++) {
                 const enemy = enemies[i];
                 const enemyElement = document.querySelector(`#${enemy.id}`);

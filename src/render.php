@@ -22,14 +22,14 @@ $icon_url = WP_PLUGIN_URL . '/wp-interactive-game/icons/';
 <div>
     <p>Instructions: Dodge the enemies and see how long you can stay free.</p>
     <ol>
-        <li>Click "Start Game" to begin.</li>
+        <li>Click "Start Game" or press keyboard "S" to begin.</li>
         <li>Use the arrow keys to move the logo.</li>
-        <li>Click "Reset Game" to start over.</li>
+        <li>Click "Reset Game" or press keyboard "R" to start over.</li>
         <li>Click "Stop Game" to end the game.</li>
     </ol>
 </div>
 <div <?php echo get_block_wrapper_attributes(); ?> data-wp-interactive='{ "namespace": "wp-interactive-game" }'>
-    <div>Time: <span id="time" data-miliseconds="0">0</span> seconds</div>
+    <div>Level <span id="level">1</span>. Time: <span id="time" data-milliseconds="0">0</span> seconds.</div>
     <div tabindex="0" class="game-container" data-wp-on--keydown="actions.moveIcon" data-wp-on--keyup="actions.stopIcon" id="<?php echo esc_attr( $unique_id ); ?>">
         <img data-wp-on--click="actions.startGame" class="game-icon" style="left: 275px; top: 275px;" src="<?php echo $icon_url ?>wordpress.svg" alt="Game Icon"/>
         <img id="wix" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>wix.svg" alt="Wix: Icon"/>
@@ -45,4 +45,3 @@ $icon_url = WP_PLUGIN_URL . '/wp-interactive-game/icons/';
     <button id="reset-game" data-wp-on--click="actions.resetGame">Reset Game</button>
     <button id="stop-game" data-wp-on--click="actions.stopGame">Stop Game</button>
 </div>
-
