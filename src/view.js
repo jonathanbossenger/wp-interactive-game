@@ -31,22 +31,56 @@ function getRandomLeft() {
 
 function spawnEnemies(){
     for (let i = 0; i < enemies.length; i++) {
-
-        const enemy = enemies[i];
-        const enemyElement = document.querySelector(`#${enemy.id}`);
+        const enemyElement = document.querySelector(`#${enemies[i].id}`);
 
         let randomTop = getRandomTop();
         let randomLeft = getRandomLeft()
 
-        let randomEnemyPosition = {
-            top: randomTop,
-            left: randomLeft,
-        };
+        // if the random top and left positions are too close to the icon, recalculate
+        const gameContainerOffset = getGameContainerOffset();
+        while (
+            randomTop >= (gameContainerOffset.top + 250) &&
+            randomTop <= (gameContainerOffset.top + 350) &&
+            randomLeft >= (gameContainerOffset.left + 250) &&
+            randomLeft <= (gameContainerOffset.left + 350)
+            ) {
+                randomTop = getRandomTop();
+                randomLeft = getRandomLeft();
+        }
 
         enemyElement.style.top = `${randomTop}px`;
         enemyElement.style.left = `${randomLeft}px`;
-
         enemyElement.style.display = 'block';
+    }
+}
+
+function enableIconMovement(event) {
+    if (event.key === 'ArrowUp') {
+        arrowUp = true;
+    }
+    if (event.key === 'ArrowDown') {
+        arrowDown = true;
+    }
+    if (event.key === 'ArrowLeft') {
+        arrowLeft = true;
+    }
+    if (event.key === 'ArrowRight') {
+        arrowRight = true;
+    }
+}
+
+function disableIconMovement(event) {
+    if (event.key === 'ArrowUp') {
+        arrowUp = false;
+    }
+    if (event.key === 'ArrowDown') {
+        arrowDown = false;
+    }
+    if (event.key === 'ArrowLeft') {
+        arrowLeft = false;
+    }
+    if (event.key === 'ArrowRight') {
+        arrowRight = false;
     }
 }
 
@@ -80,11 +114,25 @@ function moveIcon(delta) {
 }
 
 // Move the enemies
-function moveEnemies(delta) {
+function moveEnemies() {
     const gameContainerOffset = getGameContainerOffset();
-
+    // select a random number between 0 and the number of enemies
+    const randomEnemy = Math.floor(Math.random() * enemies.length);
     for (let i = 0; i < enemies.length; i++) {
         let enemyElement = document.querySelector(`#${enemies[i].id}`);
+        // if the random enemy is the same as the current enemy,
+        // check if the enemy is within a certain range of the game container, and change its direction
+        if (i === randomEnemy) {
+            if (
+                parseInt(enemyElement.style.top) >= (gameContainerOffset.top + 250) &&
+                parseInt(enemyElement.style.top) <= (gameContainerOffset.top + 350) &&
+                parseInt(enemyElement.style.left) >= (gameContainerOffset.left + 250) &&
+                parseInt(enemyElement.style.left) <= (gameContainerOffset.left + 350)
+                ) {
+                    enemies[i].horizontalDirection = horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)];
+                    enemies[i].verticalDirection = verticalDirections[Math.floor(Math.random() * verticalDirections.length)];
+            }
+        }
 
         /**
          * Calculating left and right directions
@@ -110,7 +158,6 @@ function moveEnemies(delta) {
             enemies[i].verticalDirection = 'down';
         }
 
-
         if (enemies[i].horizontalDirection === 'right') {
             enemyElement.style.left = `${parseInt(enemyElement.style.left) + enemySpeed}px`;
         }   else {
@@ -127,7 +174,6 @@ function moveEnemies(delta) {
 
 function detectCollision() {
     let iconOffset = getOffset(icon);
-
     for (let i = 0; i < enemies.length; i++) {
         let enemyElement = document.querySelector(`#${enemies[i].id}`);
         let enemyOffset = getOffset(enemyElement);
@@ -155,9 +201,19 @@ function renderExplosion() {
 }
 
 function updateTime(progress) {
+    if (progress <= 0) {
+        return;
+    }
     const timeElement = document.querySelector('#time');
     const time = parseInt(timeElement.getAttribute('data-milliseconds'));
-    const newTime = time + progress;
+
+    let newTime;
+    if (time === 0) {
+        newTime = progress;
+    }else {
+        newTime = time + progress;
+    }
+
     timeElement.setAttribute('data-milliseconds', newTime);
     let elapsedSeconds = Math.round(newTime/1000);
 
@@ -167,7 +223,6 @@ function updateTime(progress) {
         let enemySpeedIncrease = elapsedSeconds / 10;
         // increase enemy speed by 0.25 for every enemy speed increase
         enemySpeed = baseEnemySpeed + ( 0.25 * enemySpeedIncrease );
-        console.log(`Enemy speed increased to ${ enemySpeed }`);
         // update level
         if (enemySpeedIncrease > 0) {
             level = enemySpeedIncrease + 1;
@@ -176,7 +231,7 @@ function updateTime(progress) {
         }
     }
 
-    timeElement.innerHTML = `${ elapsedSeconds }`;
+    timeElement.innerHTML = `${ newTime / 1000 }`;
 }
 
 // Update game state
@@ -184,18 +239,23 @@ function update(progress) {
     updateTime(progress);
     let delta = progress / 60;
     moveIcon(delta);
-    moveEnemies(delta);
+    moveEnemies();
     detectCollision();
 }
 
 // The main game loop, keeps running until the game ends.
 // https://gamedev.stackexchange.com/a/130617
 function loop(timestamp) {
-    let progress = timestamp - lastRender
+    let progress;
+    if (lastRender === 0) {
+        progress = 0;
+    } else {
+        progress = timestamp - lastRender;
+    }
     if (lastRender !== timestamp) {
         update(progress);
     }
-    lastRender = timestamp
+    lastRender = timestamp;
     if (gameState === 'running') {
         animationFrameId = window.requestAnimationFrame(loop)
     } else {
@@ -203,52 +263,74 @@ function loop(timestamp) {
     }
 }
 
-let lastRender = 0
-let animationFrameId;
-let gameState = 'running';
-let killer;
-let baseEnemySpeed = 1.5;
-let enemySpeed = baseEnemySpeed;
-let level = 1;
+function resetGame() {
+    console.clear();
+    console.log('Reset Game');
+
+    lastRender = 0;
+    const timeElement = document.querySelector('#time');
+    timeElement.innerHTML = '0';
+    timeElement.setAttribute('data-milliseconds', 0);
+
+    gameState = 'running';
+
+    icon.src = icon.src.replace('bomb-explosion.svg', 'wordpress.svg');
+    icon.style.width = '50px';
+    icon.style.height = '50px';
+    icon.style.top = '275px';
+    icon.style.left = '275px';
+
+    baseEnemySpeed = 1.75;
+    enemySpeed = baseEnemySpeed;
+    level = 1;
+    const levelElement = document.querySelector('#level');
+    levelElement.innerHTML = `${ level }`;
+
+    enemies = [
+        {
+            id: 'wix',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        },{
+            id: 'squarespace',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        },
+        {
+            id: 'weebly',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        },
+        {
+            id: 'shopify',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        },
+        {
+            id: 'webflow',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        },
+        {
+            id: 'contentful',
+            horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
+            verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
+        }];
+
+    for (let i = 0; i < enemies.length; i++) {
+        const enemyElement = document.querySelector(`#${enemies[i].id}`);
+        enemyElement.style.display = 'none';
+    }
+}
 
 const icon = document.querySelector('.game-icon');
 const speed = 20;
-
-let arrowLeft, arrowRight, arrowUp, arrowDown = false;
-
 const horizontalDirections = ['left', 'right'];
 const verticalDirections = ['up', 'down'];
 
-let enemies = [
-    {
-        id: 'wix',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    },{
-        id: 'squarespace',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    },
-    {
-        id: 'weebly',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    },
-    {
-        id: 'shopify',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    },
-    {
-        id: 'webflow',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    },
-    {
-        id: 'contentful',
-        horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-        verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-    }];
+let enemies = [];
+let lastRender, animationFrameId, gameState, killer, baseEnemySpeed, enemySpeed, level;
+let arrowLeft, arrowRight, arrowUp, arrowDown = false;
 
 window.addEventListener("keydown", (event) => {
     if (event.key === 's') {
@@ -265,38 +347,17 @@ store('wp-interactive-game', {
     actions: {
         startGame: () => {
             console.log('Start Game');
+            resetGame();
             spawnEnemies();
-            animationFrameId = window.requestAnimationFrame(loop)
+            animationFrameId = window.requestAnimationFrame(loop);
         },
         moveIcon: (event) => {
             event.preventDefault();
-            if (event.key === 'ArrowUp') {
-                arrowUp = true;
-            }
-            if (event.key === 'ArrowDown') {
-                arrowDown = true;
-            }
-            if (event.key === 'ArrowLeft') {
-                arrowLeft = true;
-            }
-            if (event.key === 'ArrowRight') {
-                arrowRight = true;
-            }
+            enableIconMovement(event);
         },
         stopIcon: (event) => {
             event.preventDefault();
-            if (event.key === 'ArrowUp') {
-                arrowUp = false;
-            }
-            if (event.key === 'ArrowDown') {
-                arrowDown = false;
-            }
-            if (event.key === 'ArrowLeft') {
-                arrowLeft = false;
-            }
-            if (event.key === 'ArrowRight') {
-                arrowRight = false;
-            }
+            disableIconMovement(event);
         },
     },
 });
@@ -304,65 +365,12 @@ store('wp-interactive-game', {
 store('wp-interactive-game-controls', {
     actions: {
         startGame: () => {
-            // set focus on the game-container
             const gameContainer = document.querySelector('.game-container');
             gameContainer.focus();
-            // trigger click on the game-icon
-            const gameIcon = document.querySelector('.game-icon');
-            gameIcon.click();
+            icon.click();
         },
         resetGame: () => {
-            console.clear();
-            console.log('Reset Game');
-            const timeElement = document.querySelector('#time');
-            timeElement.innerHTML = '0';
-            timeElement.setAttribute('data-milliseconds', 0);
-            gameState = 'running';
-            icon.src = icon.src.replace('bomb-explosion.svg', 'wordpress.svg');
-            icon.style.width = '50px';
-            icon.style.height = '50px';
-            icon.style.top = '275px';
-            icon.style.left = '275px';
-            baseEnemySpeed = 1.5;
-            enemySpeed = baseEnemySpeed;
-            level = 1;
-            const levelElement = document.querySelector('#level');
-            levelElement.innerHTML = `${ level }`;
-            for (let i = 0; i < enemies.length; i++) {
-                const enemy = enemies[i];
-                const enemyElement = document.querySelector(`#${enemy.id}`);
-                enemyElement.style.display = 'none';
-            }
-            enemies = [
-                {
-                    id: 'wix',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                },{
-                    id: 'squarespace',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                },
-                {
-                    id: 'weebly',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                },
-                {
-                    id: 'shopify',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                },
-                {
-                    id: 'webflow',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                },
-                {
-                    id: 'contentful',
-                    horizontalDirection: horizontalDirections[Math.floor(Math.random() * horizontalDirections.length)],
-                    verticalDirection: verticalDirections[Math.floor(Math.random() * verticalDirections.length)],
-                }];
+            resetGame();
         },
         stopGame: () => {
             console.log('Stop Game');
