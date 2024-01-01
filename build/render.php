@@ -29,9 +29,9 @@ $icon_url = WP_PLUGIN_URL . '/wp-interactive-game/icons/';
     </ol>
 </div>
 <div <?php echo get_block_wrapper_attributes(); ?> data-wp-interactive='{ "namespace": "wp-interactive-game" }'>
-    <div>Level <span id="level">1</span>. Time: <span id="time" data-milliseconds="0">0</span> seconds.</div>
-    <div tabindex="0" class="game-container" data-wp-on--keydown="actions.moveIcon" data-wp-on--keyup="actions.stopIcon" id="<?php echo esc_attr( $unique_id ); ?>">
-        <img data-wp-on--click="actions.startGame" class="game-icon" style="left: 275px; top: 275px;" src="<?php echo $icon_url ?>wordpress.svg" alt="Game Icon"/>
+    <div>Level: <span id="level">1</span>. Time: <span id="time">0</span> seconds.</div>
+    <div tabindex="0" class="game-container" data-wp-on--keydown="actions.enableMoveIcon" data-wp-on--keyup="actions.disableMoveIcon" id="<?php echo esc_attr( $unique_id ); ?>">
+        <img data-wp-on--click="actions.initializeGame" class="game-icon" style="left: 275px; top: 275px;" src="<?php echo $icon_url ?>wordpress.svg" alt="Game Icon"/>
         <img id="wix" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>wix.svg" alt="Wix: Icon"/>
         <img id="squarespace" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>squarespace.svg" alt="Squarespace: Icon"/>
         <img id="weebly" class="enemy-icon" style="display: none; left: 0px; top:0px;" src="<?php echo $icon_url ?>weebly.svg" alt="Weebly: Icon"/>

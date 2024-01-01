@@ -18,7 +18,8 @@
 		"[^.]*"
 	],
 	"dependencies": {
-		"@wordpress/interactivity": "^3.1.0"
+		"@wordpress/interactivity": "^3.1.0",
+		"axios": "^1.6.3"
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^26.19.0"
