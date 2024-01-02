@@ -258,44 +258,50 @@ function renderExplosion() {
 function highScoreCheck() {
     setTimeout(function(){
         let person = prompt("Game over! Please enter your name to log your score to the leaderboard");
-        if (person == null) {
-            return;
+        if (person != null || person != "") {
+            postHighScore(person);
         }
-        const applicationKey = getCookie('wp-interactive-game');
-        let title = person;
-        let convertedTime = time/1000;
-        let content = 'Level: ' + level.toString() + '. Time: ' + convertedTime.toString() + ' seconds.';
-        axios.post(
-            '/wp-json/wp/v2/high-score',
-            {
-                title: title,
-                content: content,
-                status: "publish",
-                meta: {
-                    level: level.toString(),
-                    time: time.toString(),
-                },
-            },
-            {
-                headers: { 'Authorization': applicationKey },
-            }
-        ).then( function( response ) {
-            console.log('High Score Posted', response);
-            // fetch top 10 scores
-            axios.get(
-                '/wp-json/wp-interactive-game/v1/high-scores'
-            ).then( function( response ) {
-                let highScores = response.data;
-                let highScoresString = "High Scores: \n\r";
-                for (let i = 0; i < highScores.length; i++) {
-                    highScoresString += highScores[i].post_title + " - " + highScores[i].post_content + "\n\r";
-                }
-                alert(highScoresString);
-            } );
-        } ).catch( function( error ) {
-            console.log('High Score Post Failed', error);
-        } );
     }, 500);
+}
+
+function postHighScore(person) {
+    if (person == null || person == "") {
+        return;
+    }
+    const applicationKey = getCookie('wp-interactive-game');
+    let title = person;
+    let convertedTime = time/1000;
+    let content = 'Level: ' + level.toString() + '. Time: ' + convertedTime.toString() + ' seconds.';
+    axios.post(
+        '/wp-json/wp/v2/high-score',
+        {
+            title: title,
+            content: content,
+            status: "publish",
+            meta: {
+                level: level.toString(),
+                time: time.toString(),
+            },
+        },
+        {
+            headers: { 'Authorization': applicationKey },
+        }
+    ).then( function( response ) {
+        // fetch top 10 scores
+        axios.get(
+            '/wp-json/wp-interactive-game/v1/high-scores'
+        ).then( function( response ) {
+            let highScores = response.data;
+            console.log(highScores);
+            let highScoresString = "Top 10 High Scores: \n\r";
+            for (let i = 0; i < highScores.length; i++) {
+                highScoresString += highScores[i].post_title + " - " + highScores[i].post_content + "\n\r";
+            }
+            alert(highScoresString);
+        } );
+    } ).catch( function( error ) {
+        console.log('High Score Post Failed', error);
+    } );
 }
 
 /*

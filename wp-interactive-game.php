@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       WP Interactive Game
  * Description:       An interactive game block built with the Interactivity API
- * Version:           1.0.0
+ * Version:           1.0.2
  * Requires at least: 6.1
  * Requires PHP:      7.0
  * Author:            Jonathan Bossenger
@@ -99,7 +99,7 @@ function wp_interactive_game_wp_interactive_game_block_init() {
 			'wp-interactive-game-view',
 			plugin_dir_url( __FILE__ ) . 'src/view.js',
 			array( '@wordpress/interactivity' ),
-			'1.0.0'
+			'1.0.2'
 		);
 	}
 }
@@ -165,8 +165,28 @@ function wp_interactive_game_register_game_script(){
 		'wp-interactive-game',
 		plugin_dir_url( __FILE__ ) . 'assets/dodge.js',
 		array( 'wp-interactive-game-axios' ),
-		'1.0.0',
+		'1.0.2',
 		true
 	);
 	wp_enqueue_script( 'wp-interactive-game' );
+}
+
+add_shortcode('wp-interactive-game-high-scores', 'wp_interactive_game_high_scores' );
+function wp_interactive_game_high_scores() {
+	$args = array(
+		'post_type' => 'high_score',
+		'posts_per_page' => 50,
+		'meta_key' => 'time', //name of meta field
+		'orderby' => 'meta_value_num',
+		'order' => 'DESC', // you can modify it as per your use
+		'fields' => array('post_title', 'post_content')
+	);
+	$high_scores = get_posts( $args );
+	$html = '<h2>High Scores</h2>';
+	$html .= '<ol>';
+	foreach ( $high_scores as $high_score ) {
+		$html .= '<li>' . $high_score->post_title . ' - ' . $high_score->post_content . '</li>';
+	}
+	$html .= '</ol>';
+	return $html;
 }
