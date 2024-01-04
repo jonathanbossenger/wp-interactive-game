@@ -396,7 +396,7 @@ function resetGame() {
     console.log('Reset Game');
 
     arrowLeft, arrowRight, arrowUp, arrowDown = false;
-    
+
     lastRender = 0;
 
     time = 0;
