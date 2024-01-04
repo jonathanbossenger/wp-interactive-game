@@ -43,7 +43,7 @@ function getGameContainerOffset() {
  */
 function getRandomTop() {
     const gameContainerOffset = getGameContainerOffset();
-    const randomTop = Math.floor(Math.random() * (gameContainerOffset.top + 600 - gameContainerOffset.top + 1)) + gameContainerOffset.top;
+    const randomTop = Math.floor(Math.random() * (gameContainerOffset.top + gameContainerMax - gameContainerOffset.top + 1)) + gameContainerOffset.top;
     return randomTop;
 }
 
@@ -52,7 +52,7 @@ function getRandomTop() {
  */
 function getRandomLeft() {
     const gameContainerOffset = getGameContainerOffset();
-    const randomLeft = Math.floor(Math.random() * (gameContainerOffset.left + 600 - gameContainerOffset.left + 1)) + gameContainerOffset.left;
+    const randomLeft = Math.floor(Math.random() * (gameContainerOffset.left + gameContainerMax - gameContainerOffset.left + 1)) + gameContainerOffset.left;
     return randomLeft;
 }
 
@@ -68,6 +68,7 @@ function spawnEnemies(){
         let randomLeft = getRandomLeft()
 
         // if the random top and left positions are too close to the icon, recalculate
+        /* @todo recalculate based on a flexible gameContainerMax value
         const gameContainerOffset = getGameContainerOffset();
         while (
             randomTop >= (gameContainerOffset.top + 250) &&
@@ -78,6 +79,7 @@ function spawnEnemies(){
             randomTop = getRandomTop();
             randomLeft = getRandomLeft();
         }
+        */
 
         enemyElement.style.top = `${randomTop}px`;
         enemyElement.style.left = `${randomLeft}px`;
@@ -135,7 +137,7 @@ function moveIcon(delta) {
         icon.style.top = `${parseInt(icon.style.top) - movement}px`;
     }
     if (arrowDown) {
-        if (parseInt(icon.style.top) >= 545) {
+        if (parseInt(icon.style.top) >= enemyMovementBound) {
             return;
         }
         icon.style.top = `${parseInt(icon.style.top) + movement}px`;
@@ -147,7 +149,7 @@ function moveIcon(delta) {
         icon.style.left = `${parseInt(icon.style.left) - movement}px`;
     }
     if (arrowRight) {
-        if (parseInt(icon.style.left) >= 545) {
+        if (parseInt(icon.style.left) >= enemyMovementBound) {
             return;
         }
         icon.style.left = `${parseInt(icon.style.left) + movement}px`;
@@ -166,7 +168,7 @@ function moveEnemies() {
          * if the random enemy is the same as the current enemy,
          * check if the enemy is within a certain range of the game container,
          * and change its direction
-         */
+         @todo recalculate based on a flexible gameContainerMax value
         if (i === randomEnemy) {
             if (
                 parseInt(enemyElement.style.top) >= (gameContainerOffset.top + 250) &&
@@ -178,17 +180,18 @@ function moveEnemies() {
                 enemies[i].verticalDirection = verticalDirections[Math.floor(Math.random() * verticalDirections.length)];
             }
         }
+        */
 
         /**
          * Calculating left and right directions
          */
         let updatedLeftPosition = parseInt(enemyElement.style.left) + enemySpeed;
 
-        if (updatedLeftPosition >= ( gameContainerOffset.left + 575 ) ) {
+        if (updatedLeftPosition >= ( gameContainerOffset.left + enemyMovementDirectionMax ) ) {
             enemies[i].horizontalDirection = 'left';
         }
 
-        if (updatedLeftPosition <= gameContainerOffset.left - 25 )  {
+        if (updatedLeftPosition <= gameContainerOffset.left - enemyMovementDirectionMin )  {
             enemies[i].horizontalDirection = 'right';
         }
 
@@ -196,10 +199,10 @@ function moveEnemies() {
          * Calculating up and down directions
          */
         let updatedTopPosition = parseInt(enemyElement.style.top) + enemySpeed;
-        if (updatedTopPosition >= gameContainerOffset.top + 575 ) {
+        if (updatedTopPosition >= gameContainerOffset.top + enemyMovementDirectionMax ) {
             enemies[i].verticalDirection = 'up';
         }
-        if(updatedTopPosition <= gameContainerOffset.top - 25) {
+        if(updatedTopPosition <= gameContainerOffset.top - enemyMovementDirectionMin) {
             enemies[i].verticalDirection = 'down';
         }
 
@@ -466,6 +469,16 @@ const verticalDirections = ['up', 'down'];
 let enemies = [];
 let lastRender, animationFrameId, gameState, killer, baseEnemySpeed, enemySpeed, level, time;
 let arrowLeft, arrowRight, arrowUp, arrowDown = false;
+
+const gameContainer = document.querySelector('.game-container');
+const gameContainerRect = gameContainer.getBoundingClientRect();
+console.log(gameContainerRect);
+let gameContainerMax = gameContainerRect.width;
+let enemyMovementBound = gameContainerMax * 0.9; // 545
+
+let enemyMovementDirectionMax = gameContainerMax - 25; // 575
+let enemyMovementDirectionMin = 25; // 25
+
 
 /*
  * Event Listeners
