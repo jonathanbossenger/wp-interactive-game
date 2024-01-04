@@ -257,7 +257,10 @@ function renderExplosion() {
 
 function highScoreCheck() {
     setTimeout(function(){
-        let person = prompt("Game over! Please enter your name to log your score to the leaderboard");
+        let convertedTime = time/1000;
+        convertedTime = convertedTime.toFixed(2);
+        let score = 'Level: ' + level.toString() + '. Time: ' + convertedTime.toString() + ' seconds.';
+        let person = prompt("Game over! Your score is: " + score + " Please enter your name to log your score to the leaderboard, or click cancel to play again");
         if (person != null || person != "") {
             postHighScore(person);
         }
@@ -271,6 +274,7 @@ function postHighScore(person) {
     const applicationKey = getCookie('wp-interactive-game');
     let title = person;
     let convertedTime = time/1000;
+    convertedTime = convertedTime.toFixed(2);
     let content = 'Level: ' + level.toString() + '. Time: ' + convertedTime.toString() + ' seconds.';
     axios.post(
         '/wp-json/wp/v2/high-score',
@@ -298,6 +302,7 @@ function postHighScore(person) {
                 highScoresString += highScores[i].post_title + " - " + highScores[i].post_content + "\n\r";
             }
             alert(highScoresString);
+            window.location.reload();
         } );
     } ).catch( function( error ) {
         console.log('High Score Post Failed', error);
@@ -329,8 +334,10 @@ function updateTime(progress) {
             levelElement.innerHTML = `${ level }`;
         }
     }
+    let convertedTime = time / 1000
+    convertedTime = convertedTime.toFixed(2);
     const timeElement = document.querySelector('#time');
-    timeElement.innerHTML = `${ time / 1000 }`;
+    timeElement.innerHTML = `${ convertedTime }`;
 }
 
 /*
@@ -388,6 +395,8 @@ function resetGame() {
     console.clear();
     console.log('Reset Game');
 
+    arrowLeft, arrowRight, arrowUp, arrowDown = false;
+    
     lastRender = 0;
 
     time = 0;

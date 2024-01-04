@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       WP Interactive Game
  * Description:       An interactive game block built with the Interactivity API
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 6.1
  * Requires PHP:      7.0
  * Author:            Jonathan Bossenger
@@ -15,6 +15,27 @@
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
+}
+
+function wp_interactive_game_fetch_high_scores( $per_page ) {
+	$today = getdate();
+	$args = array(
+		'post_type' => 'high_score',
+		'posts_per_page' => $per_page,
+		'meta_key' => 'time', //name of meta field
+		'orderby' => 'meta_value_num',
+		'order' => 'DESC', // you can modify it as per your use
+		'fields' => array('post_title', 'post_content'),
+		'date_query' => array(
+			array(
+				'year'  => $today['year'],
+				'month' => $today['mon'],
+				'day'   => $today['mday'],
+			),
+	),
+	);
+	$high_scores = get_posts( $args );
+	return $high_scores;
 }
 
 register_activation_hook( __FILE__, 'wp_interactive_game_add_game_role_capabilities' );
@@ -66,21 +87,12 @@ function wp_interactive_game_register_game_routes(){
 	register_rest_route( 'wp-interactive-game/v1', '/high-scores', array(
 		'methods' => 'GET',
 		'callback' => 'wp_interactive_game_get_high_scores',
-		'permission_callback' => null,
+		'permission_callback' => '__return_true',
 	) );
 }
 
 function wp_interactive_game_get_high_scores(){
-	$args = array(
-		'post_type' => 'high_score',
-		'posts_per_page' => 10,
-		'meta_key' => 'time', //name of meta field
-		'orderby' => 'meta_value_num',
-		'order' => 'DESC', // you can modify it as per your use
-		'fields' => array('post_title', 'post_content')
-	);
-	$high_scores = get_posts( $args );
-	return $high_scores;
+	return wp_interactive_game_fetch_high_scores( 10 );
 }
 
 /**
@@ -165,7 +177,7 @@ function wp_interactive_game_register_game_script(){
 		'wp-interactive-game',
 		plugin_dir_url( __FILE__ ) . 'assets/dodge.js',
 		array( 'wp-interactive-game-axios' ),
-		'1.0.2',
+		'1.0.3',
 		true
 	);
 	wp_enqueue_script( 'wp-interactive-game' );
@@ -173,17 +185,8 @@ function wp_interactive_game_register_game_script(){
 
 add_shortcode('wp-interactive-game-high-scores', 'wp_interactive_game_high_scores' );
 function wp_interactive_game_high_scores() {
-	$args = array(
-		'post_type' => 'high_score',
-		'posts_per_page' => 50,
-		'meta_key' => 'time', //name of meta field
-		'orderby' => 'meta_value_num',
-		'order' => 'DESC', // you can modify it as per your use
-		'fields' => array('post_title', 'post_content')
-	);
-	$high_scores = get_posts( $args );
-	$html = '<h2>High Scores</h2>';
-	$html .= '<ol>';
+	$high_scores = wp_interactive_game_fetch_high_scores( 50 );
+	$html        = '<ol>';
 	foreach ( $high_scores as $high_score ) {
 		$html .= '<li>' . $high_score->post_title . ' - ' . $high_score->post_content . '</li>';
 	}
